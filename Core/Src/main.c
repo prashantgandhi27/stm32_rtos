@@ -18,6 +18,8 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <stdint.h>
+
 #include "system_init.h"
 #include "cmsis_os.h"
 
@@ -62,6 +64,25 @@ void Thread_MsgQueue2 (void *argument) {
   }
 }
 
+void ToggleLED(void *arg)
+{
+	static uint8_t pinState = GPIO_PIN_SET;
+	while(1)
+	{
+		if (GPIO_PIN_SET == pinState)
+		{
+			pinState = GPIO_PIN_RESET;
+		}
+		else
+		{
+			pinState = GPIO_PIN_SET;
+		}
+		HAL_GPIO_WritePin(GPIOB, LD2_Pin, pinState);
+
+		osDelay(1000);
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -91,6 +112,11 @@ int main(void)
   }
   tid_Thread_MsgQueue2 = osThreadNew(Thread_MsgQueue2, NULL, NULL);
   if (tid_Thread_MsgQueue2 == NULL) {
+	  return(-1);
+  }
+
+  if (NULL == osThreadNew(ToggleLED, NULL, NULL))
+  {
 	  return(-1);
   }
 
